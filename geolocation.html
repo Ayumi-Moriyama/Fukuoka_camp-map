@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>福岡キャンプマップ</title>
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP" rel="stylesheet">
+  <style>
+    html,
+    body {
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Sans JP";
+    }
+
+    header {
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    main {
+      height: calc(100vh - 100px);
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>FUKUOKA CAMP MAP</h1>
+    <select name="selectBox" id="type">
+      <option value="road" selected>road</option>
+      <option value="aerial">aerial</option>
+      <option value="grayscale">grayscale</option>
+    </select>
+  </header>
+  <main>
+    <div id="myMap"></div>
+  </main>
+
+  <!-- jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <!-- BingMapsAPI -->
+  <script
+    src="https://www.bing.com/api/maps/mapcontrol?mkt=ja-jp&key=Ao2t_jNOuMjEFtAaN2Yq8WqETO-3NaF2EhXNmp7BfZhD_xjpQLOjpl6fECPUk_2O &callback=GetMap"></script>
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <script>
+
+    //Maps Init
+    let map, typeid;
+
+    // pushピン（現在地）の定義
+    function pushPin(lat, lng, map) {
+      const location = new Microsoft.Maps.Location(lat, lng);
+      const pin = new Microsoft.Maps.Pushpin(location, {
+        color: "red",
+        text: "HERE",
+        visible: true,
+      });
+      map.entities.push(pin);
+    }
+
+    function getPositionError(position) {
+      console.log("位置情報が取得できませんでした");
+    }
+
+    function getPositionSuccess(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      map = new Microsoft.Maps.Map("#myMap", {
+        center: {
+          latitude: lat,
+          longitude: lng,
+        },
+        zoom: 16,
+      });
+      pushPin(lat, lng, map);
+      console.log(lat, lng)
+      // // 天気の情報を取得する
+      const requestUrl =
+        "https://api.open-meteo.com/v1/forecast?latitude=" +
+        lat +
+        "&longitude=" +
+        lng +
+        "&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=Asia%2FTokyo";
+
+      axios
+        .get(requestUrl)
+        .then(function (response) {
+          // リクエスト成功時の処理（responseに結果が入っている）
+          console.log(response);
+          console.log(response.data.daily.weathercode[0]);
+        })
+        .catch(function (error) {
+          // リクエスト失敗時の処理（errorにエラー内容が入っている）
+          console.log(error);
+        });
+      // .finally(function () {
+      //   // 成功失敗に関わらず必ず実行
+      //   console.log("done!");
+      // });
+
+
+
+
+      //Maps Select
+      document.getElementById("type").onchange = function () {
+        // selectBoxの値を取得
+        typeid = this.value;
+
+        if (typeid == "road") type = { mapTypeId: Microsoft.Maps.MapTypeId.road };
+        if (typeid == "aerial") type = { mapTypeId: Microsoft.Maps.MapTypeId.aerial };
+        if (typeid == "grayscale") type = { mapTypeId: Microsoft.Maps.MapTypeId.grayscale };
+        console.log(type);
+        map.setView(type);
+      }
+
+
+      //Set:Infobox
+      // let location1 = map.getCenter();
+      let location1 = new Microsoft.Maps.Location(33.516892, 130.3668323);
+      let infobox = new Microsoft.Maps.Infobox(location1, {
+        title: 'ABURAYAMA FUKUOKA',
+        description: '牧場に隣接',
+
+        actions: [{
+          label: "施設詳細",
+          eventHandler: function () {
+            alert("作成中です");
+          }
+        }, {
+          label: "公式サイトへ",
+          eventHandler: function () {
+            location.href = 'https://www.snowpeak.co.jp/locations/aburayama/';
+          }
+        }]
+      });
+
+      //Set:Infobox
+      let location2 = new Microsoft.Maps.Location(33.6445082, 130.2143519);
+      let infobox2 = new Microsoft.Maps.Infobox(location2, {
+        title: '唐泊VILLAGE',
+        description: 'トゥクトゥクに乗れる',
+
+        actions: [{
+          label: "施設詳細",
+          eventHandler: function () {
+            alert("作成中です");
+          }
+        }, {
+          label: "公式サイトへ",
+          eventHandler: function () {
+            location.href = 'https://www.karadomari.jp/';
+          }
+        }]
+      });
+      //Set:Infobox
+      let location3 = new Microsoft.Maps.Location(33.6669817, 130.4321458);
+      let infobox3 = new Microsoft.Maps.Infobox(location3, {
+        title: 'かしいのはまビレッジ',
+        description: '遊園地跡地のキャンプ場',
+
+        actions: [{
+          label: "施設詳細",
+          eventHandler: function () {
+            alert("作成中です");
+          }
+        }, {
+          label: "公式サイトへ",
+          eventHandler: function () {
+            location.href = 'https://www.kashiinohama-village.com/';
+          }
+        }]
+      });
+      //Set:Infobox
+      let location4 = new Microsoft.Maps.Location(33.5511835, 130.2796926);
+      let infobox4 = new Microsoft.Maps.Infobox(location4, {
+        title: '今宿野外活動センター',
+        description: 'バスで行けるキャンプ場',
+
+        actions: [{
+          label: "施設詳細",
+          eventHandler: function () {
+            alert("作成中です");
+          }
+        }, {
+          label: "公式サイトへ",
+          eventHandler: function () {
+            location.href = 'https://imajuku-yagai.jp/';
+          }
+        }]
+      });
+      //Set:Infobox
+      let location5 = new Microsoft.Maps.Location(33.5270121, 130.3105208);
+      let infobox5 = new Microsoft.Maps.Infobox(location5, {
+        title: 'CO_YARD KANATAKE',
+        description: 'かなたけの里公園内',
+
+        actions: [{
+          label: "施設詳細",
+          eventHandler: function () {
+            alert("作成中です");
+          }
+        }, {
+          label: "公式サイトへ",
+          eventHandler: function () {
+            location.href = 'https://coyard.jp/';
+          }
+        }]
+      });
+
+      //Set:Infobox
+      let location6 = new Microsoft.Maps.Location(33.6676643, 130.367245);
+      let infobox6 = new Microsoft.Maps.Infobox(location6, {
+        title: 'INN THE PARK 福岡',
+        description: '海の中道海浜公園内',
+
+        actions: [{
+          label: "施設詳細",
+          eventHandler: function () {
+            alert("作成中です");
+          }
+        }, {
+          label: "公式サイトへ",
+          eventHandler: function () {
+            location.href = 'https://www.innthepark.jp/fukuoka/';
+          }
+        }]
+      });
+
+      //Add:Infobox
+      infobox.setMap(map); //Add infobox to Map
+      infobox2.setMap(map); //Add infobox to Map
+      infobox3.setMap(map); //Add infobox to Map
+      infobox4.setMap(map); //Add infobox to Map
+      infobox5.setMap(map); //Add infobox to Map
+      infobox6.setMap(map); //Add infobox to Map
+
+      Microsoft.Maps.Events.addHandler(map, "click", function () {
+        alert("クリックしたよ");
+      });
+
+    }
+
+    function GetMap() {
+      // 位置情報の取得
+      navigator.geolocation.getCurrentPosition(getPositionSuccess, getPositionError);
+    };
+
+
+
+
+
+  </script>
+</body>
+
+</html>
